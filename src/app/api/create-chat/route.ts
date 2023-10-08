@@ -7,8 +7,9 @@ export async function POST(req: Request, res: Response){
         const body = await req.json();
         const {file_key, file_name} = body;
         console.log(`File key: ${file_key} File name: ${file_name}`);
-        await loadS3IntoPinecone(file_key);
-        return NextResponse.json({status: 200, message: 'Success'});
+        // Pages is the array of documents that we are expecting -- We upload this to Pinecone
+        const pages = await loadS3IntoPinecone(file_key);
+        return NextResponse.json({pages});
     } catch (error){
         console.error(error);
         return NextResponse.json({status: 500, message: 'Internal server error'});

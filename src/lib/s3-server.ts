@@ -19,9 +19,12 @@ export async function downloadFromS3(file_key: string){
             Key: file_key,
         };
 
-        // We can extract the file name from the file key
+        // We can extract the file name using the file key as part of the params object - The other component is the bucket name we are retrieving from
+        // getObject is a method that retrieves an object from S3
         const obj = await s3.getObject(params).promise();
         const file_name = `C:\\Windows\\Temp\\pdf-${Date.now()}.pdf`;
+        
+        // We write the file to the file system using the file name and the object body
         fs.writeFileSync(file_name, obj.Body as Buffer);
         return file_name;
     } catch (error){
