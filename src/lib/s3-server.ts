@@ -3,10 +3,13 @@ import fs from 'fs';
 
 export async function downloadFromS3(file_key: string){
     try{
+        // We need to configure the AWS SDK with the credentials that we have stored in the .env file
         AWS.config.update({
             accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY_ID,
             secretAccessKey: process.env.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY,
         });
+
+        // We create a new instance of the S3 client
         const s3 = new AWS.S3({
             params: {
                 Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
@@ -14,6 +17,8 @@ export async function downloadFromS3(file_key: string){
             region: 'us-west-2'
             
         });
+
+        // Define the parameters for the file that we are retrieving from S3
         const params = {
             Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME!,
             Key: file_key,
