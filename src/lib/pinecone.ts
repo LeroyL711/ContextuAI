@@ -1,4 +1,4 @@
-import { Pinecone, Vector } from "@pinecone-database/pinecone";
+import { Pinecone, PineconeClient, Vector, utils as PineconeUtils } from "@pinecone-database/pinecone";
 import { downloadFromS3 } from "./s3-server";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import md5 from 'md5';
@@ -8,18 +8,28 @@ import {
 } from "@pinecone-database/doc-splitter";
 import { truncate } from "fs";
 import { getEmbeddings } from "./embeddings";
+import { convertToAscii } from "./utils";
 
 
-let pinecone: Pinecone | null = null;
+let pinecone: PineconeClient | null = null;
 
 export const getPineconeClient = async () => {
   if (!pinecone) {
-    pinecone = new Pinecone({
-      apiKey: process.env.PINECONE_API_KEY!,
-      environment: process.env.PINECONE_ENVIRONMENT!,
-    });
-  }
-  return pinecone;
+  //   pinecone = new Pinecone({
+  //     apiKey: process.env.PINECONE_API_KEY!,
+  //     environment: process.env.PINECONE_ENVIRONMENT!,
+  //   });
+  // }
+  // return pinecone;
+
+  // Need to use deprecated PineconeClient instead of Pinecone to satisfy parameter requirements of chunkedUpsert
+  pinecone = new PineconeClient();
+  await pinecone.init({
+    environment: process.env.PINECONE_ENVIRONMENT!,
+    apiKey: process.env.PINECONE_API_KEY!,
+  });
+}
+return pinecone;
 };
 
 // PDFPage is the type of the document that we are expecting to receive from the PDFLoader
@@ -29,7 +39,11 @@ type PDFPage = {
     loc: { pageNumber: number };
   };
 };
+
+// The retrieval augmented generation
 export async function loadS3IntoPinecone(fileKey: string) {
+
+
   // 1. Obtain the PDF file from S3 --> Download and read from PDF
   console.log("Downloading from S3 into file system");
 
@@ -46,15 +60,27 @@ export async function loadS3IntoPinecone(fileKey: string) {
   const pages = (await loader.load()) as PDFPage[];
 
   // 2. Split the PDF into smaller documents
-  const docs = await Promise.all(pages.map((pages) => prepareDocument(pages)));
+  const docs = await Promise.all(pages.map(prepareDocument));
 
   // 3. Vectorize and embed individual documents
-  const vectors = await Promise.all(docs.flat().map((doc) => embedDocuments(doc)));
+  const vectors = await Promise.all(docs.flat().map(embedDocuments));
 
   // 4. Upload the vectors to Pinecone
+  // create a new instance of the Pinecone client
+  const client = await getPineconeClient();
+  // Once we have the client, we create an index using the Index method with the name of the index as the parameter
+  const pineconeIndex = client.Index('quizzr');
 
+  console.log('Uploading vectors to Pinecone');
+  
+ const nameSpace = convertToAscii(fileKey);
+ // Helps update and push vectors into the pinecone index 
+ // NOTE THAT NAMESPACES ARE NOT SUPPORTED IN FREE TIER OF PINECONE - AS A RESULT, WE PUT AN EMPTY STRING AS THE NAMESPACE
+ PineconeUtils.chunkedUpsert(pineconeIndex, vectors, "", 10);
+ return docs[0];
 }
 
+// function to embed the documents -- calls getEmbeddings from embeddings.ts -- returns the embeddings as a vector
 async function embedDocuments(doc: Document){
   try {
     const embeddings = await getEmbeddings(doc.pageContent);
