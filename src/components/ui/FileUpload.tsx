@@ -6,8 +6,10 @@ import React from "react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const FileUpload = () => {
+  const router = useRouter();
   const [uploading, setUploading] = React.useState(false);
   // Mutations are typically used to create/update/delete data or perform side-effects
   const { mutate, isLoading } = useMutation({
@@ -47,12 +49,15 @@ const FileUpload = () => {
           return;
         }
         mutate(data, {
-          onSuccess: (data) => {
-            console.log(data);
-            toast.success("Data uploaded! " + data.message);
+          onSuccess: ({chat_id}) => {
+            toast.success("Chat created!");
+
+            // Redirect to chat page
+            router.push(`/chat/${chat_id}`);
           },
           onError: (error) => {
             toast.error("Error creating chat." + error);
+            console.error(error);
           },
         });
         console.log("data", data);
