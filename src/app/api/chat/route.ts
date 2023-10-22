@@ -6,7 +6,7 @@ import {Configuration, OpenAIApi} from 'openai-edge';
 import {OpenAIStream, StreamingTextResponse} from 'ai';
 import { getContext } from '@/lib/context';
 import { db } from '@/lib/db';
-import { chats } from '@/lib/db/schema';
+import { chats, messages as dbMessages } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { Message } from 'ai/react';
@@ -26,6 +26,8 @@ export async function POST(req: Request){
 
         // Get chat matching the chatId from database, uses the fileKey of the 
         const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
+
+        // There should only be one chat with the given chatId
         if (_chats.length != 1) {
             return NextResponse.json({error: 'Chat not found'}, {status: 404});
         }
@@ -66,7 +68,24 @@ export async function POST(req: Request){
             ],
             stream: true
         })
-        const stream = OpenAIStream(response);
+        const stream = OpenAIStream(response, {
+            onStart: async() => {
+                // save user message to database
+                await db.insert(dbMessages).values({
+                    chatId,
+                    content: lastMessage.content,
+                    role: 'user',
+                })
+            },
+            onCompletion: async(completion) => {
+                // save ai message into db
+                await db.insert(dbMessages).values({
+                    chatId,
+                    content: completion,
+                    role: 'system',
+                })
+            }
+        });
         return new StreamingTextResponse(stream);
     } catch (error) {
         console.log(" Error calling OpenAI chat API", error);
