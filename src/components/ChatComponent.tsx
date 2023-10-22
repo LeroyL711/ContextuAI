@@ -6,13 +6,16 @@ import { Button } from "./ui/button";
 import { Send } from "lucide-react";
 import MessageList from "./MessageList";
 
-type Props = {};
+type Props = {chatId: number};
 
-const ChatComponent = (props: Props) => {
+const ChatComponent = ({chatId}: Props) => {
   // useChat is a custom hook that returns the input, handleInputChange, handleSubmit, and messages
   // it is imported from ai/react
   const { input, handleInputChange, handleSubmit, messages } = useChat({
     api: "/api/chat",
+    body: {
+        chatId,
+    }
   });
   return (
     <div className="relative max-h-screen overflow-auto">
