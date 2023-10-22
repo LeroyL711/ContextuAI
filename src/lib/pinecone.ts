@@ -67,7 +67,7 @@ export async function loadS3IntoPinecone(fileKey: string) {
   // 3. Vectorize and embed individual documents
   const vectors = await Promise.all(docs.flat().map(embedDocuments));
 
-  // 4. Upload the vectors to Pinecone
+  // 4. Upload the vectors to Pinecone 
   // create a new instance of the Pinecone client
   const client = await getPineconeClient();
   // Once we have the client, we create an index using the Index method with the name of the index as the parameter

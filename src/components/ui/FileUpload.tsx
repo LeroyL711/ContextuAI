@@ -69,13 +69,13 @@ const FileUpload = () => {
     },
   });
   return (
-    <div className="p-2 bg-white rounded-xl">
+    <div className="p-2 bg-white rounded-xl dark:bg-black">
       {/* This is the div that we are going to be dragging and dropping files into. */}
       {/* React dropzone docs say that to add props that are to be applied to the element, pass them through the getRootProps function to prevent them from being overridden  */}
       <div
         {...getRootProps({
           className:
-            "border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-8 flex justify-center items-center flex-col",
+            "border-dashed border-2 rounded-xl cursor-pointer bg-gray-50 py-8 flex justify-center items-center flex-col dark:bg-black dark:border-white",
         })}
       >
         <input {...getInputProps()} />
