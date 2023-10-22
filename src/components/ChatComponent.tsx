@@ -11,14 +11,24 @@ type Props = {chatId: number};
 const ChatComponent = ({chatId}: Props) => {
   // useChat is a custom hook that returns the input, handleInputChange, handleSubmit, and messages
   // it is imported from ai/react
+
   const { input, handleInputChange, handleSubmit, messages } = useChat({
     api: "/api/chat",
     body: {
         chatId,
     }
   });
+  React.useEffect(() => {
+    const messageContainer = document.getElementById("message-container");
+    if (messageContainer){
+        messageContainer.scrollTo({
+            top: messageContainer.scrollHeight,
+            behavior: "smooth",
+        })
+    }
+  }, [messages]);
   return (
-    <div className="relative max-h-screen overflow-auto">
+    <div className="relative max-h-screen overflow-auto" id="message-container">
       {/* header */}
       <div className="sticky top-0 inset-x-0 p-2 bg-white h-fit">
         <h3 className="text-xl font-bold">Chat</h3>

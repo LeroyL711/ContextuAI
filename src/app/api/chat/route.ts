@@ -1,4 +1,4 @@
-// Route for communicating with the OpenAI API
+// Route for communicating with the OpenAI API -- Provides context of the PDF to the AI
 
 import {Configuration, OpenAIApi} from 'openai-edge';
 
@@ -21,7 +21,10 @@ const openai = new OpenAIApi(config);
 
 export async function POST(req: Request){
     try {
+        // parse the request body as JSON
         const {messages, chatId} = await req.json();
+
+        // Get chat matching the chatId from database, uses the fileKey of the 
         const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
         if (_chats.length != 1) {
             return NextResponse.json({error: 'Chat not found'}, {status: 404});
@@ -29,9 +32,8 @@ export async function POST(req: Request){
         const fileKey = _chats[0].fileKey;
         // The last message is the message sent in by the user -- it is the query itself
         const lastMessage = messages[messages.length - 1];
-
         // Get the context from the last message
-        const context = await getContext(lastMessage, fileKey)
+        const context = await getContext(lastMessage.content, fileKey)
         
         // Feeds the context into the chatGPT
         const prompt = {
@@ -58,14 +60,16 @@ export async function POST(req: Request){
             model: 'gpt-3.5-turbo',
             // Message array is passed into OpenAI with the relevant documents and all messages that only belong to the user
             // Messages from the system are not passed into OpenAI to save tokens
-            messages: {
-                prompt, ...messages.filter((message: Message) => message.role === 'user')
-            },
+            messages: [
+                prompt, 
+                ...messages.filter((message: Message) => message.role === 'user')
+            ],
             stream: true
         })
         const stream = OpenAIStream(response);
         return new StreamingTextResponse(stream);
     } catch (error) {
-        
+        console.log(" Error calling OpenAI chat API", error);
+        throw error;
     }
 }
