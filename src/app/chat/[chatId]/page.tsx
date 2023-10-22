@@ -41,7 +41,7 @@ const ChatPage = async ({ params: { chatId } }: Props) => {
         </div>
         {/* pdf viewer */}
         <div className = "max-h-screen p-4 overflow-auto flex-[5]">
-            <PDFViewer pdf_url={currentChat?.pdfUrl || ""}/>
+            <PDFViewer pdf_url={currentChat?.pdfUrl || ""} />
         </div>
         {/* Chat component */}
         <div className="flex-[3] border-1-4 border-1-slate-200">

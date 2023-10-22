@@ -2,14 +2,26 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'; // Button imported from shadCN
 import { UserButton, auth } from '@clerk/nextjs';
 import Link from 'next/link';
-import { LogIn } from 'lucide-react';
+import { ArrowRight, LogIn } from 'lucide-react';
 import FileUpload from '@/components/ui/FileUpload';
+import { db } from '@/lib/db';
+import { chats } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 // Adding in async makes so that this is a server component. This entire codeblock is going to run once on the server to generate HTML code.
 // This HTML code is then sent back to the client and rendered. This is a good way to do things like fetch data from an API and then render it on the page.
 export default async function Home() {
   const {userId} = await auth();
   const isAuth = !!userId;
+
+  let firstChat;
+  if (userId){
+    firstChat = await db.select().from(chats).where(eq(chats.userId, userId));
+    if (firstChat){
+      firstChat = firstChat[0];
+    }
+
+  }
   return (
     <div className="w-screen min-h-screen bg-gradient-to-b from-sky-400 to-sky-200">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -22,7 +34,15 @@ export default async function Home() {
           </div>
         
           <div className="flex mt-2">
-            {isAuth && <Button>Go to Chats</Button>}
+            {isAuth && firstChat && (
+            <>
+              <Link href={`/chat/${firstChat.id}`}>
+              <Button>
+                Go to Chats <ArrowRight className="ml-2"/>
+              </Button>
+              </Link>
+            </>
+            )}
           </div>
           <p className='max-w-xl mt-1 text-lg text-slate-800'>Join millions of students, researchers, and professionals to instantly answer quiestions and understand research with AI</p>
           <div className="w-full mt-4">

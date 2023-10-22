@@ -5,10 +5,21 @@ import { useChat } from "ai/react";
 import { Button } from "./ui/button";
 import { Send } from "lucide-react";
 import MessageList from "./MessageList";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { Message } from "ai";
 
 type Props = {chatId: number};
 
 const ChatComponent = ({chatId}: Props) => {
+    const { data, isLoading } = useQuery({
+        queryKey: ["chat", chatId],
+        queryFn: async () => {
+            const res = await axios.post<Message[]>("/api/get-messages", {chatId});
+            return res.data;
+        },
+    })
+
   // useChat is a custom hook that returns the input, handleInputChange, handleSubmit, and messages
   // it is imported from ai/react
 
@@ -16,7 +27,8 @@ const ChatComponent = ({chatId}: Props) => {
     api: "/api/chat",
     body: {
         chatId,
-    }
+    },
+        initialMessages: data || [],
   });
   React.useEffect(() => {
     const messageContainer = document.getElementById("message-container");
@@ -34,7 +46,7 @@ const ChatComponent = ({chatId}: Props) => {
         <h3 className="text-xl font-bold">Chat</h3>
       </div>
       {/* messages List*/}
-      <MessageList messages={messages} />
+      <MessageList messages={messages} isLoading={isLoading}/>
       <form
         onSubmit={handleSubmit}
         className="sticky bottom-0 inset-x-0 px-2 py-4 bg-white"
