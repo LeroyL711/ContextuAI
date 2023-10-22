@@ -1,4 +1,4 @@
-// maps to /api/create-chat eg. we can call this route in the frontend with somehting like this: axios.post('/api/create-chat', {name: 'my chat'})
+// maps to /api/create-chat eg. we can call this route in the frontend with somehting like this: axios.post('/api/create-chat', {name: 'my chat'}) and a chat will be created in the database
 import { loadS3IntoPinecone } from '@/lib/pinecone';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';

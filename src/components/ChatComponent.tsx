@@ -11,9 +11,11 @@ type Props = {};
 const ChatComponent = (props: Props) => {
   // useChat is a custom hook that returns the input, handleInputChange, handleSubmit, and messages
   // it is imported from ai/react
-  const { input, handleInputChange, handleSubmit, messages } = useChat();
+  const { input, handleInputChange, handleSubmit, messages } = useChat({
+    api: "/api/chat",
+  });
   return (
-    <div className="relative max-h-screen overflow-scroll">
+    <div className="relative max-h-screen overflow-auto">
       {/* header */}
       <div className="sticky top-0 inset-x-0 p-2 bg-white h-fit">
         <h3 className="text-xl font-bold">Chat</h3>

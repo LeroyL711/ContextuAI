@@ -60,6 +60,8 @@ export async function loadS3IntoPinecone(fileKey: string) {
   const pages = (await loader.load()) as PDFPage[];
 
   // 2. Split the PDF into smaller documents
+
+  // pages.map((pages) => prepareDocument(pages)); works the same as below but it explicitly defines an arrow function that takes in page as a argument 
   const docs = await Promise.all(pages.map(prepareDocument));
 
   // 3. Vectorize and embed individual documents
