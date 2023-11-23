@@ -33,3 +33,14 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").notNull().defaultNow(), // time the message was created at
   role: userSystemEnum("role").notNull(), // role of the sender of the message
 });
+
+export const userSubs = pgTable("user_subs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 256 }).notNull().unique(),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 256 })
+    .notNull()
+    .unique(),
+  stripeSubId: varchar("stripe_sub_id", { length: 256 }).unique(),
+  stripePriceId: varchar("stripe_price_id", { length: 256 }),
+  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+});

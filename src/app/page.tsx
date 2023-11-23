@@ -28,7 +28,7 @@ export default async function Home() {
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center">
             <h1 className="m-3 text-5xl font-semibold">
-              Chat with any PDF
+              Gain insight on your PDFs
             </h1>
             <ThemeToggle className="mr-3"/>
             <UserButton afterSignOutUrl='/'/>
@@ -45,7 +45,7 @@ export default async function Home() {
             </>
             )}
           </div>
-          <p className='max-w-xl mt-1 text-lg text-slate-800 dark:text-slate-400'>Join millions of students, researchers, and professionals to instantly answer quiestions and understand research with AI</p>
+          <p className='max-w-xl mt-1 text-lg text-slate-800 dark:text-slate-400'>Upload your documents and let AI provide valuable insights, making information extraction and analysis a breeze.</p>
           <div className="w-full mt-4">
             {isAuth ? <FileUpload/> : (<Link href="/login"><Button>Login to get started! <LogIn className="w-4 h-4 ml-2"/></Button></Link>)}
           </div>

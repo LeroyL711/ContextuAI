@@ -58,7 +58,7 @@ const ChatComponent = ({chatId}: Props) => {
             placeholder="Ask any question..."
             className="w-full"
           />
-          <Button className="bg-blue-600 ml-2">
+          <Button className="bg-blue-600 ml-2 dark:text-white">
             <Send className="w-4 h-4" />
           </Button>
         </div>
